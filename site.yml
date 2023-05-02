@@ -2,14 +2,14 @@
 #   hosts: workers
 #   become: true
 #   roles:
-#     ## - docker
+#     ## - Docker
 #     # - jenkins
 #     # - gitlab
 #     # - sonarqube
-#     ## - nodejs
+#     ## - Nodejs
 #     ## - python
-#     ## - jee
-#     ## - nginx
+#     ## - Jee
+#     ## - Nginx
 
 - name: install using DOCKER COMPOSE
   hosts: workers
