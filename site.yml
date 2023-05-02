@@ -1,0 +1,29 @@
+# - name: install Docker
+#   hosts: workers
+#   become: true
+#   roles:
+#     ## - docker
+#     # - jenkins
+#     # - gitlab
+#     # - sonarqube
+#     ## - nodejs
+#     ## - python
+#     ## - jee
+#     ## - nginx
+
+- name: install using DOCKER COMPOSE
+  hosts: workers
+  become: true
+  tasks:
+    - name: copy Docker Compose files
+      copy:
+        src: files/docker-compose.yml
+        dest: /somewhere/yourproject/{{ item }}
+
+    # use files parameter to use multiple docker-compose.yml files
+    - name: deploy Docker Compose stack
+      community.docker.docker_compose:
+        project_src: /somewhere/yourproject
+        files:
+        - docker-compose.yml
+        - docker-compose.prod.yml

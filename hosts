@@ -1,0 +1,2 @@
+[workers]
+worker-server ansible_host=f4345433f02c.mylabserver.com remote_user=cloud_user ansible_sudo_pass=ajmi2023 ansible_ssh_pass=ajmi2023
