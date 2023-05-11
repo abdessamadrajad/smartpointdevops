@@ -32,9 +32,6 @@ services:
     image: 'sonarqube:7.6-community'
     ports:
       - '9092:9000'
-    environment:
-      SONARQUBE_ADMIN_LOGIN: 'admin'
-      SONARQUBE_ADMIN_PASSWORD: 'ajmi2023'
     volumes:
       - ./volumes/sonarqube_conf:/opt/sonarqube/conf
       - ./volumes/sonarqube_data:/opt/sonarqube/data

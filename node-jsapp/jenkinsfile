@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+
+    environment {
+        registry = 'ajmimoncer/nodejsapp'
+        registryCredential = 'ea8fcb59-e5e3-4a59-ace3-b430cba623b1'
+        dockerImage = ''
+        workerServer = 'f4345433f01c.mylabserver.com'
+        jenkinsServer = 'f4345433f02c.mylabserver.com'
+        workerUsername = 'cloud_user'
+        workerSSHKey = credentials('jenkins')
+    }
+
+    stages {
+        stage('Cloning our Git') {
+            steps {
+                git(
+                    url: 'http://f4345433f02c.mylabserver.com:8000/gitlab-instance-99b23c7c/node-jsapp.git',
+                    branch: 'main',
+                    credentialsId: '4a8681a3-2c6e-4b3e-81c9-3da935c1152b'
+                )
+                sh 'ls'
+            }
+        }
+
+        stage('Building Docker Image') {
+            steps {
+                script {
+                    dockerImage = docker.build("${registry}:${BUILD_NUMBER}")
+                }
+            }
+        }
+
+        stage('Deploying Docker Image to Dockerhub') {
+            steps {
+                script {
+                    withDockerRegistry([credentialsId: registryCredential, url: '']) {
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
+
+        stage('Deploying Docker Image to Worker Server') {
+            steps {
+                sshagent(credentials: ['jenkins']) {
+                    sh '''
+                    ssh $workerUsername@$workerServer -i /ansible_key.pem "docker stop mycontainer && docker rm mycontainer || true"
+                    ssh $workerUsername@$workerServer -i /ansible_key.pem "docker pull ${registry}:${BUILD_NUMBER}"
+                    ssh $workerUsername@$workerServer -i /ansible_key.pem "docker run -d -p 5000:5000 --name mycontainer ${registry}:${BUILD_NUMBER}"
+                    '''
+                }
+            }
+        }
+
+        stage('Cleaning Up') {
+            steps {
+                sh "docker rmi --force ${registry}:${BUILD_NUMBER}"
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker system prune --force'
+        }
+    }
+}
